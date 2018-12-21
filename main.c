@@ -264,6 +264,7 @@ int main(int argc, const char *argv[]) {
 
         // if "exit" is entered,
         if (!strcmp(input_string, "exit")) { // if input_string is "exit"
+            printf("\nYeah, you'd better use other shell.\n");
             break;
         }
 
