@@ -156,7 +156,6 @@ int own_command_handler(char **parsed_args) {
     const int own_commands_num = 4;
     int i, switch_args = 0;
     char *own_commands[own_commands_num];
-    char *username;
 
     own_commands[0] = "exit";
     own_commands[1] = "cd";
@@ -276,11 +275,13 @@ int main(int argc, const char *argv[]) {
         // 2 if it is including a pipe.
 
         // execute
-        if (exec_flag == 1)
+        if (exec_flag == 1) {
             exec_args(parsed_args);
+        }
 
-        if (exec_flag == 2)
+        if (exec_flag == 2) {
             exec_args_piped(parsed_args, parsed_args_piped);
+        }
     }
 
     return 0;
