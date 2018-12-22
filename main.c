@@ -12,7 +12,7 @@
 const int MAXCOM = 1000;
 const int MAXLIST = 100;
 
-char USER[BUFSIZ] = "N/A";
+char USER[BUFSIZ] = "N/A", HOSTNAME[BUFSIZ] = "N/A";
 
 // Shell startup
 void init_shell() {
@@ -37,17 +37,16 @@ void init_shell() {
     printf("                         ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝    ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝╚═╝\n\n");
 
     strcpy(USER, getenv("USER"));
-    printf("USER: %s\n", USER);
+    gethostname(HOSTNAME, sizeof(HOSTNAME));
     sleep(2);
     clear();
 }
 
 // Function to print Username, Hostname, Current Directory
 void print_dir() {
-    char hostname[BUFSIZ], cwd[BUFSIZ];
-    gethostname(hostname, sizeof(hostname));
+    char cwd[BUFSIZ];
     getcwd(cwd, sizeof(cwd));
-    printf("\n%s@%s %s", USER, hostname, cwd);
+    printf("\n%s@%s %s", USER, HOSTNAME, cwd);
 }
 
 // Function to read input
@@ -70,11 +69,11 @@ void exec_args(char **parsed_args) {
     pid_t pid = fork();
 
     if (pid == -1) {
-        printf("\nError: Can't fork process");
+        fprintf(stderr, "\nError: Can't fork process");
         return;
     } else if (pid == 0) {
         if (execvp(parsed_args[0], parsed_args) < 0) {
-            printf("\nError: Can't execute command");
+            fprintf(stderr, "\nError: Can't execute command");
         }
         exit(0);
     } else {
@@ -91,12 +90,12 @@ void exec_args_piped(char **parsed_args, char **parsed_pipe) {
     pid_t p1, p2;
 
     if (pipe(pipefd) < 0) {
-        printf("\nFailed to initialized pipe");
+        fprintf(stderr, "\nError: Failed to initialized pipe");
         return;
     }
     p1 = fork();
     if (p1 < 0) {
-        printf("\nCan't fork");
+        fprintf(stderr, "\nError: Can't fork");
         return;
     }
 
@@ -108,7 +107,7 @@ void exec_args_piped(char **parsed_args, char **parsed_pipe) {
         close(pipefd[1]);
 
         if (execvp(parsed_args[0], parsed_args) < 0) {
-            printf("\nCan't execute command 1..");
+            fprintf(stderr, "\nError: Can't execute command 1..");
             exit(0);
         }
     } else {
@@ -116,7 +115,7 @@ void exec_args_piped(char **parsed_args, char **parsed_pipe) {
         p2 = fork();
 
         if (p2 < 0) {
-            printf("\nCan't fork");
+            fprintf(stderr, "\nError: Can't fork");
             return;
         }
 
@@ -127,7 +126,7 @@ void exec_args_piped(char **parsed_args, char **parsed_pipe) {
             dup2(pipefd[0], STDIN_FILENO);
             close(pipefd[0]);
             if (execvp(parsed_pipe[0], parsed_pipe) < 0) {
-                printf("\nCan't execute command 2..");
+                fprintf(stderr, "\nError: Can't execute command 2..");
                 exit(0);
             }
         } else {
@@ -261,7 +260,7 @@ int main(int argc, const char *argv[]) {
             continue;
         }
 
-        // if "exit" is entered,
+        // if "exit" entered,
         if (!strcmp(input_string, "exit")) { // if input_string is "exit"
             printf("\nYeah, you'd better use other shell.\n");
             break;
